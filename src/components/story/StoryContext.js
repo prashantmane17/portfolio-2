@@ -15,11 +15,44 @@ export const useStory = () => {
     return ctx;
 };
 
-/** Mutable scroll state the car stage reads every frame (s = station index, intro = drive-in 0..1). */
+/**
+ * Mutable state the car stage reads every frame.
+ *  s, intro       station index (scroll) and the drive-in progress (0..1)
+ *  paint          selected finish { original, hex, metalness, roughness } (config/content.js customizer);
+ *                 `original` keeps the model's own black carbon. Starts original, so nothing changes until chosen.
+ *  yawOffset...   the visitor's drag / auto-rotation of the car (used while `interact` > 0)
+ *  camTarget      extra camera azimuth for the FRONT / SIDE / REAR buttons
+ * Mutate through the methods (they also keep React happy about not editing state directly).
+ */
 export const createView = () => ({
     s: 1,
     intro: 0,
+    paint: { original: true, hex: '#151515', metalness: 0.4, roughness: 0.2 },
+    yawOffset: 0,
+    velocity: 0,
+    dragging: false,
+    autoSpin: 0.22,
+    camTarget: 0,
+    camDelta: 0,
     reset(next) {
         this.s = next;
+    },
+    setPaint(next) {
+        this.paint = next;
+    },
+    setAutoSpin(v) {
+        this.autoSpin = v;
+    },
+    setDragging(on) {
+        this.dragging = on;
+    },
+    dragBy(dx) {
+        this.yawOffset += dx;
+        this.velocity = dx * 0.6;
+    },
+    setCam(delta) {
+        this.camTarget = delta;
+        this.yawOffset = 0;
+        this.velocity = 0;
     },
 });

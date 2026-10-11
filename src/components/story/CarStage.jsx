@@ -15,16 +15,17 @@ const CarStage = ({ model, stations }) => {
 
     useEffect(() => {
         const canvas = glRef.current;
-        const state = { stage: null, last: '', dirty: true, visible: true, dead: false, callouts: [] };
+        const state = { stage: null, last: '', dirty: true, busy: false, visible: true, dead: false, callouts: [] };
 
         const draw = (time) => {
             if (!state.stage || !state.visible) return;
-            const key = `${view.s}|${view.intro}`;
+            const key = `${view.s}|${view.intro}|${view.paint.hex}|${view.camTarget}`;
             const drifting = mode === 'pinned' && view.s < 0.6; // hero drift needs a frame every tick
-            if (key === state.last && !state.dirty && !drifting) return;
+            if (key === state.last && !state.dirty && !drifting && !state.busy) return;
             state.last = key;
             state.dirty = false;
-            const { fade } = state.stage.update(view, time, { shift: !compact, compact, drift: mode === 'pinned' });
+            const { fade, busy } = state.stage.update(view, time, { shift: !compact, compact, drift: mode === 'pinned' });
+            state.busy = busy;
             veilRef.current.style.opacity = String(fade * 0.9);
             state.callouts.forEach((el) => {
                 const p = state.stage.project(el.dataset.anchor);

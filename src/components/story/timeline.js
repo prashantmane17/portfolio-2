@@ -62,6 +62,12 @@ export function buildStoryTimeline(tl, root, view) {
         tl.fromTo(el, { x: '-60vw' }, { x: '140vw', duration: 1.6 + i * 0.25, ease: 'none' }, windows.performance.in + i * 0.15);
     });
 
+    // Customizer: swatches enter one after another.
+    const swatches = root.querySelectorAll('[data-swatch]');
+    if (swatches.length) {
+        tl.fromTo(swatches, { scale: 0.5, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.4, ease: 'back.out(1.6)', stagger: 0.07 }, windows.customizer.in + 0.4);
+    }
+
     // Callouts.
     for (const [id, [a, b]] of Object.entries(calloutWindows)) {
         const el = root.querySelector(`[data-callout="${id}"]`);

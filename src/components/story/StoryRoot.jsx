@@ -12,7 +12,7 @@ import { buildStoryTimeline } from './timeline';
  *   Narrow screens use the same story with a shorter scroll and a pulled-back camera.
  * static (prefers-reduced-motion): no pinning or scrubbing; the sections are an ordinary stack and
  *   the car holds a single pose.
- * `stage` is the 3D layer; children are the six scenes.
+ * `stage` is the 3D layer; children are the scenes.
  */
 const StoryRoot = ({ stage, children }) => {
     const reduce = useMediaQuery(reducedMotionQuery);
@@ -27,6 +27,7 @@ const StoryRoot = ({ stage, children }) => {
 
     useLayoutEffect(() => {
         view.reset(mode === 'pinned' ? 0 : 1);
+        view.setAutoSpin(mode === 'pinned' && !compact ? 0.22 : 0); // no idle spin on phones or with reduced motion
         if (mode !== 'pinned') return;
         const ctx = gsap.context(() => {
             const tl = gsap.timeline({

@@ -7,6 +7,7 @@ import RevealScene from './components/story/scenes/RevealScene';
 import PerformanceScene from './components/story/scenes/PerformanceScene';
 import AeroScene from './components/story/scenes/AeroScene';
 import InteriorScene from './components/story/scenes/InteriorScene';
+import CustomizerScene from './components/story/scenes/CustomizerScene';
 import FooterScene from './components/story/scenes/FooterScene';
 import { SmoothScroll } from './providers/SmoothScroll';
 import { car3d } from './config/car';
@@ -23,6 +24,7 @@ function App() {
           <PerformanceScene />
           <AeroScene />
           <InteriorScene />
+          <CustomizerScene />
           <FooterScene />
         </StoryRoot>
       </main>

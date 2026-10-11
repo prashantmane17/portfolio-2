@@ -3,6 +3,11 @@
  * are driven by a continuous station index (see config/story.js). three is loaded on demand so it
  * stays out of the main bundle.
  *
+ * Exterior paint: the model's body is one carbon-weave material ("Carbon_R") that interior trim
+ * also uses, so the exterior meshes get their own physical-material clone. A small shader hook blends
+ * the weave toward the chosen colour (keeping a trace of its depth), and the finish values (metalness,
+ * roughness, clearcoat) ease with it. Interior meshes keep the original material untouched.
+ *
  * Conventions (car frame, car length = 1): +z = nose, +x = across, y = up. The camera orbits a
  * target point described by azimuth / elevation / distance, so a pose reads the same whichever way
  * the car happens to face the screen.
@@ -11,7 +16,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
 export async function createCarStage(canvas, options) {
-    const { src, heading, entry, doors, repaint, stations } = options;
+    const { src, heading, entry, doors, paint: paintCfg, stations } = options;
     const THREE = await import('three');
     const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
     const { RoomEnvironment } = await import('three/examples/jsm/environments/RoomEnvironment.js');
@@ -25,10 +30,10 @@ export async function createCarStage(canvas, options) {
     const pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
-    // Key light, red rim and steel-blue fill; their strength scales down with `fade`.
+    // Key light, cool-white rim and steel-blue fill (neutral, so they never tint the paint); their strength scales down with `fade`.
     const lights = [
         { light: new THREE.DirectionalLight(0xffffff, 1.1), at: [3, 5, 4] },
-        { light: new THREE.DirectionalLight(0xff3b3b, 2.2), at: [-4, 2, -3] },
+        { light: new THREE.DirectionalLight(0xc4d4ff, 1.6), at: [-4, 2, -3] },
         { light: new THREE.DirectionalLight(0x4670aa, 1.2), at: [4, 1, -2] },
     ].map((l) => {
         l.light.position.set(...l.at);
@@ -91,20 +96,44 @@ export async function createCarStage(canvas, options) {
         h.updateMatrixWorld(true);
     });
 
-    // ---- Repaint + tail lights ---------------------------------------------------------------
-    const paint = new THREE.Color(repaint.color);
-    const target = paint.clone().multiplyScalar(repaint.gain);
-    const tinted = [];
+    // ---- Exterior paint + tail lights --------------------------------------------------------
     const tail = [];
+    let paintMat = null;
+    const paintUniforms = { uPaint: { value: new THREE.Color('#C8102E') }, uMix: { value: 0 } };
+    const paintColor = paintUniforms.uPaint.value;
+    const paintTarget = new THREE.Color('#C8102E');
+    let paintHex = '#151515';
+    let paintAmount = 0; // 0 = original carbon, 1 = fully painted
+    let original = null;
     const seen = new Set();
     model.traverse((o) => {
         const mats = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
         mats.forEach((m) => {
             if (seen.has(m)) return;
             seen.add(m);
-            if (repaint.materials.includes(m.name)) tinted.push({ m, base: m.color.clone() });
             if (m.name === 'LIGT_RED') tail.push({ m, base: m.emissive.clone(), baseIntensity: m.emissiveIntensity ?? 1 });
         });
+        // Exterior body meshes only: skip anything under interior / seat / steering / display nodes.
+        if (!o.isMesh || !o.material || o.material.name !== paintCfg.material) return;
+        for (let a = o.parent; a; a = a.parent) if (paintCfg.skip.test(a.name)) return;
+        if (!paintMat) {
+            const src = o.material;
+            original = { metalness: src.metalness, roughness: src.roughness };
+            paintMat = new THREE.MeshPhysicalMaterial({ map: src.map, color: 0xffffff, metalness: src.metalness, roughness: src.roughness, side: src.side });
+            paintMat.name = 'ExteriorPaint';
+            paintMat.envMapIntensity = 0.55;
+            paintMat.clearcoatRoughness = 0.06;
+            paintMat.onBeforeCompile = (shader) => {
+                Object.assign(shader.uniforms, paintUniforms);
+                shader.fragmentShader = `uniform vec3 uPaint;\nuniform float uMix;\n${shader.fragmentShader}`.replace(
+                    '#include <map_fragment>',
+                    `#include <map_fragment>
+                    float weave = clamp(dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114)) * 3.0, 0.0, 1.0);
+                    diffuseColor.rgb = mix(diffuseColor.rgb, uPaint * (0.9 + 0.1 * weave), uMix);`
+                );
+            };
+        }
+        o.material = paintMat;
     });
 
     // ---- Anchors: named points on the model, in car space -------------------------------------
@@ -149,6 +178,8 @@ export async function createCarStage(canvas, options) {
 
     let width = 1;
     let height = 1;
+    let lastTime = 0;
+    let lastInteract = 0;
     const tmpTarget = new THREE.Vector3();
     const tmpEye = new THREE.Vector3();
 
@@ -162,8 +193,8 @@ export async function createCarStage(canvas, options) {
 
     /**
      * view.s: station index (continuous). view.intro: 0..1 drive-in on load.
-     * opts.shift: allow the car to sit right of centre (wide screens only); opts.compact: narrow screen; opts.drift: allow the hero camera drift.
-     * Returns the pose-driven `fade` (0..1) so the page can darken with the scene.
+     * opts.shift: allow the car to sit right of centre (wide screens only); opts.compact: narrow screen; opts.drift: allow the hero camera drift;
+     * Returns { fade, busy }: `fade` (0..1) darkens the page with the scene; `busy` asks for another frame.
      */
     const update = (view, time, opts = {}) => {
         const si = clamp(view.s, 0, poses.length - 1);
@@ -175,16 +206,49 @@ export async function createCarStage(canvas, options) {
 
         // Car channels.
         const intro = view.intro;
-        pivot.rotation.y = ch('yaw');
+        // Interaction (customizer): auto-rotation + drag, weighted by `interact` so it eases out on scroll.
+        const w = ch('interact');
+        const dtI = Math.min(0.1, Math.max(0, time - lastInteract));
+        lastInteract = time;
+        if (w > 0.01 && !view.dragging) {
+            view.yawOffset += view.autoSpin * dtI + view.velocity;
+            view.velocity *= 0.92;
+        }
+        if (w < 0.01) {
+            view.yawOffset = 0;
+            view.velocity = 0;
+        }
+        if (w > 0.99) view.yawOffset = ((((view.yawOffset + Math.PI) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)) - Math.PI;
+        pivot.rotation.y = ch('yaw') + view.yawOffset * w;
+        view.camDelta += (view.camTarget - view.camDelta) * (1 - Math.exp(-dtI * 4));
         pivot.position.z = ch('carZ') - entry.distance * (1 - intro);
         pivot.position.y = entry.height * (1 - intro);
         const open = ch('door');
         hinges.forEach((h) => (h.rotation[doors.axis] = open * doors.angle * liftSign.get(h)));
-        const mix = ch('paint');
-        tinted.forEach(({ m, base }) => {
-            m.color.copy(base).lerp(target, mix);
-            m.emissive.copy(paint).multiplyScalar(repaint.glow * mix);
-        });
+        // Paint: nothing changes until a colour is chosen (`original`); then ease colour, finish and amount.
+        const want = view.paint;
+        if (want.hex !== paintHex) {
+            paintHex = want.hex;
+            paintTarget.set(want.hex);
+        }
+        const amountTarget = want.original ? 0 : 1;
+        const dt = Math.min(0.5, Math.max(0, time - lastTime)); // time-based, so slow frames still converge
+        lastTime = time;
+        const ease = 1 - Math.exp(-dt * 7);
+        const paintBusy =
+            Math.abs(paintColor.r - paintTarget.r) + Math.abs(paintColor.g - paintTarget.g) + Math.abs(paintColor.b - paintTarget.b) > 0.002 ||
+            Math.abs(paintAmount - amountTarget) > 0.002;
+        if (paintBusy) {
+            paintColor.lerp(paintTarget, ease);
+            paintAmount += (amountTarget - paintAmount) * ease;
+        }
+        const mix = paintAmount;
+        if (paintMat) {
+            paintUniforms.uMix.value = mix;
+            paintMat.metalness = lerp(original.metalness, want.metalness, mix);
+            paintMat.roughness = lerp(original.roughness, want.roughness, mix);
+            paintMat.clearcoat = mix * 0.55;
+        }
         const glow = ch('tail');
         tail.forEach(({ m, base, baseIntensity }) => {
             m.emissive.copy(base).lerp(new THREE.Color(1, 0.05, 0.05), glow);
@@ -201,7 +265,7 @@ export async function createCarStage(canvas, options) {
         const fit = clamp(1.76 / aspect, 1, 4);
         // Hero only: a very slow camera drift so the car feels alive while the page is at rest.
         const hero = opts.drift ? clamp(1 - view.s / 0.6, 0, 1) : 0;
-        const az = ch('az') + Math.sin(time * 0.5) * 0.035 * hero;
+        const az = ch('az') + view.camDelta * w + Math.sin(time * 0.5) * 0.035 * hero;
         const el = ch('el') + Math.sin(time * 0.37) * 0.01 * hero;
         // Wide shots need the full pull-back on a narrow screen; close-ups barely any.
         const wide = clamp(ch('dist') / 1.2, 0.25, 1);
@@ -215,13 +279,14 @@ export async function createCarStage(canvas, options) {
         camera.lookAt(lane.localToWorld(tmpTarget.clone()));
 
         // Narrow screens: lift the car into the upper part of the frame so the copy sits below it.
-        const lift = opts.compact ? height * 0.2 : 0;
+        const lift = opts.compact ? height * 0.24 : 0;
         camera.setViewOffset(width, height, opts.shift === false ? 0 : -width * ch('shift'), lift, width, height);
         camera.updateMatrixWorld(true);
         camera.updateProjectionMatrix();
 
         renderer.render(scene, camera);
-        return { fade };
+        const busy = paintBusy || (w > 0.01 && (view.dragging || view.autoSpin > 0 || Math.abs(view.velocity) > 1e-4)) || Math.abs(view.camTarget - view.camDelta) > 1e-3;
+        return { fade, busy };
     };
 
     /** Screen position of a named anchor (px), for DOM callouts. */

@@ -59,6 +59,31 @@ export const interior = {
     ],
 };
 
+export const customizer = {
+    eyebrow: 'PERSONALIZE YOUR MACHINE',
+    headline: ['MAKE IT', 'YOURS.'],
+    body: 'Every shade tells a story. Choose the finish that reflects your personality.',
+    label: 'CHOOSE YOUR COLOR',
+    /** The car starts in its original black carbon; nothing is repainted until a swatch is chosen. */
+    defaultId: 'nero',
+    dragHint: 'DRAG TO ROTATE',
+    note: 'Colors are illustrative starting points, not factory paint specifications.',
+    views: [
+        { id: 'front', label: 'FRONT', delta: 0.9 },
+        { id: 'side', label: 'SIDE', delta: -0.67 },
+        { id: 'rear', label: 'REAR', delta: 3.5 },
+    ],
+    /** hex = starting colour; metalness/roughness shape the finish; `original` = keep the model's own carbon. */
+    colors: [
+        { id: 'rosso', name: 'Rosso Red', hex: '#C8102E', finish: 'Deep gloss with a warm metallic flake.', metalness: 0.5, roughness: 0.28 },
+        { id: 'pearl', name: 'Pearl White', hex: '#F2F2F2', finish: 'Soft pearlescent white with a satin glow.', metalness: 0.3, roughness: 0.3 },
+        { id: 'nero', name: 'Nero Black', hex: '#151515', original: true, finish: 'The original black carbon-fibre finish.', metalness: 0.4, roughness: 0.2 },
+        { id: 'silver', name: 'Metallic Silver', hex: '#B7BBC2', finish: 'Fine metallic flake with a cool, brushed shine.', metalness: 0.85, roughness: 0.32 },
+        { id: 'emerald', name: 'Emerald Green', hex: '#153D32', finish: 'Dark metallic green that lifts in direct light.', metalness: 0.55, roughness: 0.28 },
+        { id: 'blue', name: 'Electric Blue', hex: '#173F73', finish: 'Vivid metallic blue with a glassy depth.', metalness: 0.55, roughness: 0.26 },
+    ],
+};
+
 export const footer = {
     headline: ['THE DRIVE', 'NEVER ENDS.'],
     body: 'Some machines take you places. Others make every journey unforgettable.',
@@ -78,6 +103,7 @@ export const sectionNav = [
     { id: 'performance', label: 'PERFORMANCE' },
     { id: 'aero', label: 'AERODYNAMICS' },
     { id: 'interior', label: 'INTERIOR' },
+    { id: 'customizer', label: 'COLOR' },
 ];
 
 export const navLinks = sectionNav.map(({ id, label }) => ({ name: label, href: `#${id}` }));
