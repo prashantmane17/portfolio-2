@@ -55,3 +55,15 @@ export const projects = [
         image: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?q=80&w=800&auto=format&fit=crop"
     }
 ];
+
+/** Hero backdrop. `focus` = the glasses and `lenses` = each lens, as fractions of the image (centre x/y, width, height). */
+export const heroImage = {
+    src: "/cat-glasses.png",
+    focus: {
+        x: 0.507, y: 0.333, w: 0.255, h: 0.157,
+        lenses: [
+            { x: 0.445, y: 0.322, w: 0.098, h: 0.12 },
+            { x: 0.584, y: 0.354, w: 0.092, h: 0.115 },
+        ],
+    },
+};
