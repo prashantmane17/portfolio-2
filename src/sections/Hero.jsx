@@ -10,7 +10,7 @@ const Hero = () => {
     const rise = (delay) => ({
         initial: { opacity: 0, y: 30 },
         animate: { opacity: 1, y: 0 },
-        transition: { delay, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+        transition: { delay: delay + 1.4, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
     });
 
     return (

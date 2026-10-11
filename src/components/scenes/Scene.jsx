@@ -9,14 +9,12 @@ const SCENE_FIT = 'h-full flex flex-col justify-center [&>section]:!py-16 [&>sec
  * One screen of content.
  * - pinned: stacked over the canvas, revealed by the Root's scrubbed timeline
  * - stacked: plain section with a one-time scroll reveal
- * `transition`: 'slide' rises over the previous scene, 'push' enters from the left pushing it out,
- * 'zoom' is driven by <Scenes.Backdrop>.
+ * `transition`: 'slide' rises over the previous scene; 'zoom' fades in as <Scenes.Backdrop>'s zoom ends.
  * `className` styles the scene (e.g. an opaque background). Mark animatable pieces with `data-scene-item`.
  */
 /** Edge shadow for scenes that arrive over/against another one. */
 const SHADOW = {
     slide: 'shadow-[0_-30px_60px_rgba(3,8,20,0.6)]',
-    push: 'shadow-[30px_0_60px_rgba(3,8,20,0.6)]',
 };
 
 const Scene = ({ id, transition = 'slide', className = '', children }) => {

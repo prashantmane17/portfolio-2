@@ -22,6 +22,8 @@ export default {
         }
       },
       backgroundImage: {
+        'scene-red':
+          'radial-gradient(ellipse at 25% 15%, #d42a33, transparent 60%), radial-gradient(ellipse at 90% 95%, #7a0d14, transparent 60%), linear-gradient(135deg,#b8141c,#9a1018)',
         'scene-about':
           'radial-gradient(ellipse at 18% 12%, rgba(212,162,76,.16), transparent 55%), radial-gradient(ellipse at 88% 90%, rgba(70,110,170,.28), transparent 55%), linear-gradient(135deg,#10223b,#0a1628)',
         'scene-skills':

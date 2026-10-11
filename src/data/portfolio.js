@@ -62,18 +62,20 @@ export const carImage = { src: "/car.png" };
 
 /**
  * 3D hero car (public/models/car.glb, currently a placeholder sample).
- * `windshield.at` = glass centre as fractions of the model's bounding box (each -0.5..0.5, centred),
- * `halfWidth` = half the glass width as a fraction of car length, `lateral` = left-right axis in model space.
- * `heading` = the fixed direction the car faces (radians about Y; ~1.1 = facing screen-right).
- * `travel` = how far (in car lengths) it drives off each edge.
+ * `heading` = fixed direction the car faces (radians about Y; ~1.1 = facing screen-right).
+ * `focus` = the body-panel point the scroll zooms into, as fractions of the model's bounding box
+ *           (each -0.5..0.5, centred; the sign of x picks the side).
+ * `entry` = how far (car lengths) and how high the car starts when it drives in on load.
+ * `paint` = the paint colour the zoom ends on (the next section's background matches it).
  */
 export const car3d = {
     src: "/models/car.glb",
-    windshield: { at: [0, 0.36, 0.05], halfWidth: 0.14, lateral: [1, 0, 0] },
     heading: 1.1,
-    travel: 2.4,
+    focus: [-0.5, 0.0, 0.03],
+    entry: { distance: 2.6, height: 0.6 },
+    paint: "#b8141c",
 };
 
-/** Full-width footage the windshield opens onto. Set `src` (e.g. "/showreel.mp4" in /public) when ready;
+/** Full-width footage for the Showreel section. Set `src` (e.g. "/showreel.mp4" in /public) when ready;
  *  until then the car image stands in. */
 export const showreel = { src: null, poster: "/car.png" };

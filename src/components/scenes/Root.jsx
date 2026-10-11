@@ -7,10 +7,10 @@ import Scene from './Scene';
 
 /**
  * Pinned, scroll-scrubbed stack of scenes over an optional stage canvas (<Scenes.Backdrop>).
- * A scene's `transition` is 'slide' (rises over the previous one) or 'zoom' (driven by the backdrop).
+ * A scene's `transition` is 'slide' (rises over the previous one) or 'zoom' (fades in as the backdrop's zoom finishes).
  *
  *   <Scenes.Root>
- *     <Scenes.Backdrop car="..." showreel={...} windshield={[...]} />
+ *     <Scenes.Backdrop model={...} fill="#b8141c" />
  *     <Scenes.Scene id="hero"><Hero /></Scenes.Scene>
  *     <Scenes.Scene id="about"><About /></Scenes.Scene>
  *   </Scenes.Root>
@@ -60,8 +60,7 @@ const PinnedStage = ({ ids, children }) => {
     useLayoutEffect(() => {
         const ctx = gsap.context(() => {
             const scenes = gsap.utils.toArray('[data-scene]');
-            const view = { drive: 0, p: 0, e: 0 };
-            const stage = scenes[0]?.parentElement.querySelector('[data-stage-layer]');
+            const view = { p: 0 };
             const redraw = () => drawRef.current?.(view);
 
             const tl = gsap.timeline({
@@ -88,18 +87,10 @@ const PinnedStage = ({ ids, children }) => {
                 }
 
                 if (kind === 'zoom') {
-                    // Car drives along the track, the camera pushes into the windshield, which then opens onto the footage.
-                    tl.to(view, { drive: 1, duration: SCENES.drive.duration, ease: 'power1.inOut', onUpdate: redraw }, SCENES.drive.at);
-                    tl.to(view, { p: 1, duration: SCENES.dolly.duration, ease: 'power2.inOut', onUpdate: redraw }, SCENES.dolly.at);
-                    tl.to(view, { e: 1, duration: SCENES.reveal.duration, ease: 'power2.inOut', onUpdate: redraw }, SCENES.reveal.at);
-                    tl.fromTo(scene, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, at - 0.5);
-                } else if (kind === 'push') {
-                    // Enters from the left and pushes the previous scene (and the stage) out to the right.
-                    const from = at - SCENES.slide;
-                    const leaving = [scenes[i - 1], stage].filter(Boolean);
-                    tl.fromTo(scene, { xPercent: -100 }, { xPercent: 0, duration: SCENES.slide }, from);
-                    tl.to(leaving, { xPercent: 100, duration: SCENES.slide }, from);
-                    tl.set(leaving, { autoAlpha: 0 }, at);
+                    // Camera glides the car to centre and zooms into its paint; this scene fades in on the red.
+                    tl.to(view, { p: 1, duration: SCENES.zoom.duration, ease: 'power1.inOut', onUpdate: redraw }, SCENES.zoom.at);
+                    tl.fromTo(scene, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3 }, at - 0.5);
+                    tl.set(scenes[i - 1], { autoAlpha: 0 }, at - 0.5);
                 } else {
                     const from = at - SCENES.slide;
                     const previous = scenes[i - 1];
