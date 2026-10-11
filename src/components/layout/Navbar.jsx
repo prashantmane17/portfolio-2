@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
-import { navLinks } from '../../config/sections';
+import { navLinks } from '../../config/content';
 
 
 const Navbar = () => {

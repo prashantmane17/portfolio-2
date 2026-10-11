@@ -7,29 +7,31 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Graphite base with deep navy shadows.
         dark: {
-          900: '#0a1628',
-          800: '#10223b',
-          700: '#1a3254',
+          900: '#0a0b0f',
+          800: '#12141a',
+          700: '#1b1e26',
         },
+        // Red highlights.
         primary: {
-          500: '#d4a24c',
-          400: '#f0c878',
+          500: '#e11d2e',
+          400: '#ff4b57',
         },
+        // Restrained yellow, matching the model's trim.
         accent: {
-          500: '#e9d5a1',
-          400: '#f6e7c1',
-        }
-      },
-      backgroundImage: {
-        'scene-paint':
-          'radial-gradient(ellipse at 25% 15%, #d42a33, transparent 60%), radial-gradient(ellipse at 90% 95%, #7a0d14, transparent 60%), linear-gradient(135deg,#b8141c,#9a1018)',
+          500: '#e8c21a',
+          400: '#f5d84a',
+        },
       },
       fontFamily: {
-        // Tech Startup pairing (ui-ux-pro-max): Space Grotesk for display, DM Sans for reading.
+        // Space Grotesk 600-700 for headlines and numbers; Inter 400-600 for copy, buttons and labels.
         heading: ['"Space Grotesk"', 'sans-serif'],
-        sans: ['"DM Sans"', 'sans-serif'],
-      }
+        sans: ['Inter', 'sans-serif'],
+      },
+      letterSpacing: {
+        label: '0.28em',
+      },
     },
   },
   plugins: [],

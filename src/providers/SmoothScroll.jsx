@@ -1,12 +1,8 @@
-import React, { createContext, use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Lenis from 'lenis';
 import 'lenis/dist/lenis.css';
 import { gsap, ScrollTrigger, prefersReducedMotion } from '../lib/gsap';
-
-const SmoothScrollContext = createContext(null);
-
-/** Current Lenis instance, or null (reduced motion / not ready yet). */
-export const useLenis = () => use(SmoothScrollContext);
+import { LenisContext } from './LenisContext';
 
 /** Lenis smooth scroll, driven by the GSAP ticker so ScrollTrigger stays in sync. */
 export function SmoothScroll({ children }) {
@@ -35,5 +31,5 @@ export function SmoothScroll({ children }) {
         };
     }, []);
 
-    return <SmoothScrollContext value={lenis}>{children}</SmoothScrollContext>;
+    return <LenisContext value={lenis}>{children}</LenisContext>;
 }

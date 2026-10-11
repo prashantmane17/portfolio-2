@@ -12,14 +12,32 @@
   }
 
   h1, h2 {
-    @apply leading-[1.1];
+    @apply leading-[1.02];
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary-400 ring-offset-2 ring-offset-dark-900;
   }
 }
 
-.glass-card {
-  @apply bg-dark-800/60 backdrop-blur-md border border-white/5;
+@layer components {
+  /** Compact uppercase label (eyebrows, spec captions). */
+  .label {
+    @apply text-xs font-semibold uppercase tracking-label text-primary-400;
+  }
+
+  /** Brushed-metal headline fill. */
+  .metal-text {
+    background-image: linear-gradient(180deg, #ffffff 0%, #c9ced8 45%, #7d8493 100%);
+    @apply bg-clip-text text-transparent;
+  }
 }
 
-.gradient-text {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-400 to-accent-400;
+/* Callouts near the right edge flip so their label stays on screen. */
+.callout.is-flipped .callout-row {
+  flex-direction: row-reverse;
+}
+.callout.is-flipped .callout-dot {
+  margin-left: 0;
+  margin-right: -5px;
 }

@@ -1,24 +1,24 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap, ScrollTrigger, prefersReducedMotion } from '../../lib/gsap';
 
-const NAVY = '10, 22, 40'; // tailwind dark-900
-const GOLD = '212, 162, 76';
-const STEEL = '70, 110, 170';
+const BASE = '10, 11, 15'; // tailwind dark-900 (graphite)
+const RED = '225, 29, 46';
+const NAVY = '28, 48, 92';
 const GRID = 96;
 
 const wrap = (v, size) => ((v % size) + size) % size;
 
 /** Soft light pools that drift on slow orbits and slide with the page scroll. */
 const BLOBS = [
-    { x: 0.15, y: 0.1, r: 0.6, rgb: GOLD, a: 0.2, par: 0.8, fx: 0.07, fy: 0.05, ax: 0.06, ay: 0.05, ph: 0 },
-    { x: 0.85, y: 0.45, r: 0.7, rgb: STEEL, a: 0.3, par: 1.1, fx: 0.05, fy: 0.06, ax: 0.07, ay: 0.06, ph: 2 },
-    { x: 0.35, y: 0.85, r: 0.55, rgb: GOLD, a: 0.14, par: 1.4, fx: 0.06, fy: 0.04, ax: 0.05, ay: 0.07, ph: 4 },
-    { x: 0.7, y: 1.2, r: 0.65, rgb: STEEL, a: 0.26, par: 1.7, fx: 0.04, fy: 0.07, ax: 0.08, ay: 0.05, ph: 1 },
+    { x: 0.15, y: 0.1, r: 0.6, rgb: RED, a: 0.14, par: 0.8, fx: 0.07, fy: 0.05, ax: 0.06, ay: 0.05, ph: 0 },
+    { x: 0.85, y: 0.45, r: 0.7, rgb: NAVY, a: 0.34, par: 1.1, fx: 0.05, fy: 0.06, ax: 0.07, ay: 0.06, ph: 2 },
+    { x: 0.35, y: 0.85, r: 0.55, rgb: RED, a: 0.1, par: 1.4, fx: 0.06, fy: 0.04, ax: 0.05, ay: 0.07, ph: 4 },
+    { x: 0.7, y: 1.2, r: 0.65, rgb: NAVY, a: 0.3, par: 1.7, fx: 0.04, fy: 0.07, ax: 0.08, ay: 0.05, ph: 1 },
 ];
 
 /**
  * One fixed, viewport-sized canvas behind the whole page, drawn in code:
- * navy base, drifting gold/steel light pools, a faint grid and floating dust.
+ * graphite base, drifting red/navy light pools, a faint grid and floating dust.
  * Scroll progress of the entire page moves the layers at different speeds
  * (parallax); time adds a slow idle drift. Sections that need to hide it set
  * their own background; everything else stays transparent.
@@ -47,8 +47,8 @@ const PageCanvas = () => {
 
             // Base
             const base = ctx.createLinearGradient(0, 0, 0, ch);
-            base.addColorStop(0, `rgb(${NAVY})`);
-            base.addColorStop(1, 'rgb(6, 14, 28)');
+            base.addColorStop(0, `rgb(${BASE})`);
+            base.addColorStop(1, 'rgb(5, 6, 10)');
             ctx.globalAlpha = 1;
             ctx.fillStyle = base;
             ctx.fillRect(0, 0, cw, ch);
@@ -67,7 +67,7 @@ const PageCanvas = () => {
             }
 
             // Grid
-            ctx.strokeStyle = `rgba(${GOLD}, 0.05)`;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
             ctx.lineWidth = 1;
             ctx.beginPath();
             const gy = wrap(-p * ch * 2.5, GRID);
@@ -82,7 +82,7 @@ const PageCanvas = () => {
             ctx.stroke();
 
             // Dust
-            ctx.fillStyle = `rgb(${GOLD})`;
+            ctx.fillStyle = 'rgb(255, 255, 255)';
             for (const d of dust) {
                 const y = wrap(d.y - time * d.v * 0.012 - p * d.z * 2.4, 1) * ch;
                 ctx.globalAlpha = (0.25 + 0.25 * Math.sin(time * 0.8 + d.ph)) * d.z;
