@@ -9,7 +9,7 @@ import { useStory } from '../StoryContext';
 /** Section 1: copy on the left, car on the right (drawn by the stage). Reveals on load, in order. */
 const HeroScene = () => {
     const ref = useRef(null);
-    const { goTo } = useStory();
+    const { goTo, view } = useStory();
 
     useLayoutEffect(() => {
         if (prefersReducedMotion()) return;
@@ -17,14 +17,22 @@ const HeroScene = () => {
             const items = gsap.utils.toArray('[data-hero-item]');
             gsap.set('[data-line]', { yPercent: 110 });
             gsap.set(items, { autoAlpha: 0, y: 24 });
-            gsap
-                .timeline({ delay: 1.2, defaults: { ease: 'power3.out' } })
+            const tl = gsap
+                .timeline({ paused: true, defaults: { ease: 'power3.out' } })
                 .to('[data-hero-eyebrow]', { autoAlpha: 1, y: 0, duration: 0.7 })
                 .to('[data-line]', { yPercent: 0, duration: 0.9, stagger: 0.12 }, '-=0.35')
                 .to('[data-hero-body]', { autoAlpha: 1, y: 0, duration: 0.8, stagger: 0.1 }, '-=0.45');
+            // Start once the car is on stage (or failed to load); never wait more than 3s.
+            const start = () => tl.play();
+            const off = view.onReady(() => gsap.delayedCall(0.5, start));
+            const fallback = gsap.delayedCall(3, start);
+            return () => {
+                off();
+                fallback.kill();
+            };
         }, ref);
         return () => ctx.revert();
-    }, []);
+    }, [view]);
 
     return (
         <div ref={ref}>
@@ -37,9 +45,9 @@ const HeroScene = () => {
                         as="h1"
                         id="hero-title"
                         lines={hero.headline}
-                        className="metal-text mt-5 font-bold text-5xl sm:text-6xl lg:text-7xl tracking-tight"
+                        className="metal-text hero-title mt-5 font-bold"
                     />
-                    <p data-hero-item data-hero-body className="mt-6 text-lg text-gray-300 leading-relaxed">
+                    <p data-hero-item data-hero-body className="mt-6 max-w-md text-base sm:text-lg text-gray-300 leading-relaxed">
                         {hero.body}
                     </p>
                     <button
@@ -52,8 +60,9 @@ const HeroScene = () => {
                         {hero.cta.label}
                         <ArrowUpRight size={18} aria-hidden="true" />
                     </button>
-                    <p data-hero-item data-hero-body className="mt-8 text-xs tracking-label text-gray-400">
-                        {hero.tagline}
+                    <p data-hero-item data-hero-body aria-hidden="true" className="mt-10 hidden sm:flex items-center gap-4 text-[0.65rem] tracking-label text-gray-400">
+                        <span className="scroll-cue-line" />
+                        {hero.scroll}
                     </p>
                 </div>
             </SceneFrame>

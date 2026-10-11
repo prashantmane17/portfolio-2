@@ -12,5 +12,5 @@ export const car3d = {
     heading: 1.1,
     doors: { axis: 'x', angle: 1.1 },
     paint: { material: 'Carbon_R', skip: /interior|seats|movsteer|display/i },
-    entry: { distance: 2.6, height: 0.6 },
+    entry: { distance: 1.2, height: 0.1 },
 };

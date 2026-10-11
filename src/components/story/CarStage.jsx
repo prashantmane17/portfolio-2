@@ -51,9 +51,15 @@ const CarStage = ({ model, stations }) => {
                 state.callouts = Array.from(document.querySelectorAll('[data-anchor]'));
                 resize();
                 canvas.style.opacity = '1';
-                gsap.to(view, { intro: 1, duration: 2.6, delay: 0.2, ease: 'power3.out' });
+                if (mode === 'static') view.intro = 1; // reduced motion: no drive-in
+                else gsap.to(view, { intro: 1, duration: 2.2, delay: 0.15, ease: 'power3.out' });
+                view.markReady();
             })
-            .catch((err) => console.warn('3D car failed to load:', err));
+            .catch((err) => {
+                console.warn('3D car failed to load:', err);
+                view.intro = 1;
+                view.markReady(); // show the copy anyway
+            });
 
         const tick = (time) => draw(time);
         gsap.ticker.add(tick);

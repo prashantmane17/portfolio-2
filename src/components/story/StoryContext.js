@@ -34,6 +34,18 @@ export const createView = () => ({
     autoSpin: 0.22,
     camTarget: 0,
     camDelta: 0,
+    ready: false, // the 3D stage has loaded (or failed): the hero copy waits for this
+    readyCbs: [],
+    onReady(cb) {
+        if (this.ready) cb();
+        else this.readyCbs.push(cb);
+        return () => (this.readyCbs = this.readyCbs.filter((f) => f !== cb));
+    },
+    markReady() {
+        if (this.ready) return;
+        this.ready = true;
+        this.readyCbs.splice(0).forEach((f) => f());
+    },
     reset(next) {
         this.s = next;
     },

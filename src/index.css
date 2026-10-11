@@ -26,6 +26,19 @@
     @apply text-xs font-semibold uppercase tracking-label text-primary-400;
   }
 
+  /** Hero headline: fluid size, controlled tracking. */
+  .hero-title {
+    font-size: clamp(2.5rem, 1.2rem + 5.6vw, 5.5rem);
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+  }
+
+  /** Scroll cue: a short line that slowly travels downward. */
+  .scroll-cue-line {
+    @apply block w-px h-10 bg-gradient-to-b from-primary-400 to-transparent origin-top;
+    animation: cue 2.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  }
+
   /** Brushed-metal headline fill. */
   .metal-text {
     background-image: linear-gradient(180deg, #ffffff 0%, #c9ced8 45%, #7d8493 100%);
@@ -40,4 +53,13 @@
 .callout.is-flipped .callout-dot {
   margin-left: 0;
   margin-right: -5px;
+}
+
+@keyframes cue {
+  0% { transform: scaleY(0); opacity: 0; }
+  40% { transform: scaleY(1); opacity: 1; }
+  100% { transform: scaleY(1) translateY(12px); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue-line { animation: none; }
 }

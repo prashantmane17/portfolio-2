@@ -121,7 +121,7 @@ export async function createCarStage(canvas, options) {
             original = { metalness: src.metalness, roughness: src.roughness };
             paintMat = new THREE.MeshPhysicalMaterial({ map: src.map, color: 0xffffff, metalness: src.metalness, roughness: src.roughness, side: src.side });
             paintMat.name = 'ExteriorPaint';
-            paintMat.envMapIntensity = 0.55;
+            paintMat.envMapIntensity = 0.42;
             paintMat.clearcoatRoughness = 0.06;
             paintMat.onBeforeCompile = (shader) => {
                 Object.assign(shader.uniforms, paintUniforms);
@@ -247,7 +247,7 @@ export async function createCarStage(canvas, options) {
             paintUniforms.uMix.value = mix;
             paintMat.metalness = lerp(original.metalness, want.metalness, mix);
             paintMat.roughness = lerp(original.roughness, want.roughness, mix);
-            paintMat.clearcoat = mix * 0.55;
+            paintMat.clearcoat = mix * 0.35;
         }
         const glow = ch('tail');
         tail.forEach(({ m, base, baseIntensity }) => {

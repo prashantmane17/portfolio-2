@@ -11,11 +11,11 @@ export const site = {
 };
 
 export const hero = {
-    eyebrow: 'LAMBORGHINI CENTENARIO',
+    eyebrow: 'LAMBORGHINI • ENGINEERED FOR EMOTION',
     headline: ['BORN TO', 'BREAK LIMITS.'],
-    body: 'Precision engineered. Fearlessly designed. Built to turn every drive into an unforgettable experience. A machine where Italian craftsmanship meets raw performance.',
+    body: 'Precision in every line. Power in every movement. Discover a machine created to turn every drive into an unforgettable experience.',
     cta: { label: 'EXPLORE THE MACHINE', target: 'reveal' },
-    tagline: 'V12 POWER · UNCOMPROMISING DESIGN · PURE ADRENALINE',
+    scroll: 'SCROLL TO DISCOVER',
 };
 
 export const reveal = {
@@ -76,9 +76,7 @@ export const customizer = {
     /** hex = starting colour; metalness/roughness shape the finish; `original` = keep the model's own carbon. */
     colors: [
         { id: 'rosso', name: 'Rosso Red', hex: '#C8102E', finish: 'Deep gloss with a warm metallic flake.', metalness: 0.5, roughness: 0.28 },
-        { id: 'pearl', name: 'Pearl White', hex: '#F2F2F2', finish: 'Soft pearlescent white with a satin glow.', metalness: 0.3, roughness: 0.3 },
         { id: 'nero', name: 'Nero Black', hex: '#151515', original: true, finish: 'The original black carbon-fibre finish.', metalness: 0.4, roughness: 0.2 },
-        { id: 'silver', name: 'Metallic Silver', hex: '#B7BBC2', finish: 'Fine metallic flake with a cool, brushed shine.', metalness: 0.85, roughness: 0.32 },
         { id: 'emerald', name: 'Emerald Green', hex: '#153D32', finish: 'Dark metallic green that lifts in direct light.', metalness: 0.55, roughness: 0.28 },
         { id: 'blue', name: 'Electric Blue', hex: '#173F73', finish: 'Vivid metallic blue with a glassy depth.', metalness: 0.55, roughness: 0.26 },
     ],
