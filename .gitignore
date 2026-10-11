@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Unused raw model source (too large for GitHub)
+public/models/car.obj
