@@ -8,29 +8,29 @@ export default {
     extend: {
       colors: {
         dark: {
-          900: '#140a2e',
-          800: '#1f1147',
-          700: '#2e1a66',
+          900: '#0a1628',
+          800: '#10223b',
+          700: '#1a3254',
         },
         primary: {
-          500: '#06b6d4',
-          400: '#22d3ee',
+          500: '#d4a24c',
+          400: '#f0c878',
         },
         accent: {
-          500: '#ec4899',
-          400: '#f472b6',
+          500: '#e9d5a1',
+          400: '#f6e7c1',
         }
       },
       backgroundImage: {
-        'neon-about':
-          'radial-gradient(ellipse at 20% 15%, rgba(236,72,153,.35), transparent 55%), radial-gradient(ellipse at 85% 85%, rgba(6,182,212,.35), transparent 55%), linear-gradient(135deg,#1f1147,#140a2e)',
-        'neon-skills':
-          'radial-gradient(ellipse at 80% 15%, rgba(6,182,212,.35), transparent 55%), radial-gradient(ellipse at 15% 90%, rgba(236,72,153,.3), transparent 55%), linear-gradient(135deg,#140a2e,#1f1147)',
-        'hero-cat':
-          "linear-gradient(rgba(20,10,46,.55), rgba(20,10,46,.8)), url('/cat-glasses.png')",
+        'scene-about':
+          'radial-gradient(ellipse at 18% 12%, rgba(212,162,76,.16), transparent 55%), radial-gradient(ellipse at 88% 90%, rgba(70,110,170,.28), transparent 55%), linear-gradient(135deg,#10223b,#0a1628)',
+        'scene-skills':
+          'radial-gradient(ellipse at 82% 12%, rgba(70,110,170,.28), transparent 55%), radial-gradient(ellipse at 14% 92%, rgba(212,162,76,.14), transparent 55%), linear-gradient(135deg,#0a1628,#10223b)',
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        // Tech Startup pairing (ui-ux-pro-max): Space Grotesk for display, DM Sans for reading.
+        heading: ['"Space Grotesk"', 'sans-serif'],
+        sans: ['"DM Sans"', 'sans-serif'],
       }
     },
   },

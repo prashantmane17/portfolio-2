@@ -56,14 +56,24 @@ export const projects = [
     }
 ];
 
-/** Hero backdrop. `focus` = the glasses and `lenses` = each lens, as fractions of the image (centre x/y, width, height). */
-export const heroImage = {
-    src: "/cat-glasses.png",
-    focus: {
-        x: 0.507, y: 0.333, w: 0.255, h: 0.157,
-        lenses: [
-            { x: 0.445, y: 0.322, w: 0.098, h: 0.12 },
-            { x: 0.584, y: 0.354, w: 0.092, h: 0.115 },
-        ],
-    },
+
+/** Static car PNG (public/car.png): used as the footage stand-in and on small screens. */
+export const carImage = { src: "/car.png" };
+
+/**
+ * 3D hero car (public/models/car.glb, currently a placeholder sample).
+ * `windshield.at` = glass centre as fractions of the model's bounding box (each -0.5..0.5, centred),
+ * `halfWidth` = half the glass width as a fraction of car length, `lateral` = left-right axis in model space.
+ * `heading` = the fixed direction the car faces (radians about Y; ~1.1 = facing screen-right).
+ * `travel` = how far (in car lengths) it drives off each edge.
+ */
+export const car3d = {
+    src: "/models/car.glb",
+    windshield: { at: [0, 0.36, 0.05], halfWidth: 0.14, lateral: [1, 0, 0] },
+    heading: 1.1,
+    travel: 2.4,
 };
+
+/** Full-width footage the windshield opens onto. Set `src` (e.g. "/showreel.mp4" in /public) when ready;
+ *  until then the car image stands in. */
+export const showreel = { src: null, poster: "/car.png" };

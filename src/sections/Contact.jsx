@@ -111,7 +111,7 @@ const Contact = () => {
                         <button
                             type="submit"
                             disabled={status === 'loading' || status === 'success'}
-                            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-primary-500 to-accent-500 hover:opacity-90 text-white px-8 py-4 rounded-xl font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 focus:ring-offset-dark-900 disabled:opacity-70"
+                            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-primary-500 to-accent-500 hover:opacity-90 text-dark-900 font-semibold px-8 py-4 rounded-xl font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 focus:ring-offset-dark-900 disabled:opacity-70"
                         >
                             {status === 'loading' ? (
                                 <>

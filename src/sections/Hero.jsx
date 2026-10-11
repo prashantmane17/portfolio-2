@@ -2,26 +2,26 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { TypeAnimation } from 'react-type-animation';
 import { ArrowRight } from 'lucide-react';
-import { personalInfo } from '../data/portfolio';
+import { useScenes } from '../components/scenes';
+import { personalInfo, carImage } from '../data/portfolio';
 
 const Hero = () => {
+    const { mode } = useScenes();
     const rise = (delay) => ({
         initial: { opacity: 0, y: 30 },
         animate: { opacity: 1, y: 0 },
-        transition: { delay: delay + 0.9, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+        transition: { delay, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
     });
 
     return (
-        <section className="relative min-h-screen flex flex-col justify-center items-center overflow-hidden pt-20">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary-500/15 rounded-full blur-[120px] -z-10 pointer-events-none" />
-            <div className="absolute top-1/2 right-0 w-[500px] h-[500px] bg-accent-500/15 rounded-full blur-[100px] -z-10 pointer-events-none" />
-
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full text-center">
+        <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-20">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full text-left">
+                <div className="max-w-xl">
                 <motion.div {...rise(0.1)} className="inline-block px-4 py-2 border border-white/15 rounded-full bg-white/10 backdrop-blur-sm mb-6">
-                    <p className="text-sm font-medium tracking-wide text-gray-200">01 / 03 &mdash; Welcome to my portfolio</p>
+                    <p className="text-sm font-medium tracking-wide text-gray-200">Welcome to my portfolio</p>
                 </motion.div>
 
-                <motion.h1 {...rise(0.25)} className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
+                <motion.h1 {...rise(0.25)} className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6">
                     Hi, I'm <span className="gradient-text">{personalInfo.name}</span>
                 </motion.h1>
 
@@ -34,14 +34,14 @@ const Hero = () => {
                     />
                 </motion.div>
 
-                <motion.p {...rise(0.55)} className="max-w-2xl mx-auto text-lg text-gray-300 mb-10 leading-relaxed">
+                <motion.p {...rise(0.55)} className="max-w-xl text-lg text-gray-300 mb-10 leading-relaxed">
                     {personalInfo.about}
                 </motion.p>
 
-                <motion.div {...rise(0.7)} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <motion.div {...rise(0.7)} className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <a
                         href="#projects"
-                        className="group flex items-center gap-2 bg-gradient-to-r from-primary-500 to-accent-500 text-white px-8 py-3.5 rounded-full font-medium hover:opacity-90 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 focus:ring-offset-dark-900"
+                        className="group flex items-center gap-2 bg-gradient-to-r from-primary-500 to-accent-500 text-dark-900 px-8 py-3.5 rounded-full font-medium hover:opacity-90 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 focus:ring-offset-dark-900"
                     >
                         View Projects
                         <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
@@ -53,8 +53,9 @@ const Hero = () => {
                         Contact Me
                     </a>
                 </motion.div>
+                </div>
+                {mode === 'stacked' && <img src={carImage.src} alt="" className="w-full max-w-xl mt-10 ml-auto" />}
             </div>
-
         </section>
     );
 };

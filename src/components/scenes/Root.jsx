@@ -6,10 +6,11 @@ import { SCENES } from './config';
 import Scene from './Scene';
 
 /**
- * Pinned, scroll-scrubbed stack of scenes over a canvas backdrop.
+ * Pinned, scroll-scrubbed stack of scenes over an optional stage canvas (<Scenes.Backdrop>).
+ * A scene's `transition` is 'slide' (rises over the previous one) or 'zoom' (driven by the backdrop).
  *
  *   <Scenes.Root>
- *     <Scenes.Backdrop images={[...]} />
+ *     <Scenes.Backdrop car="..." showreel={...} windshield={[...]} />
  *     <Scenes.Scene id="hero"><Hero /></Scenes.Scene>
  *     <Scenes.Scene id="about"><About /></Scenes.Scene>
  *   </Scenes.Root>
@@ -19,7 +20,6 @@ import Scene from './Scene';
 const Root = ({ children }) => {
     const enabled = useMediaQuery(SCENES.mediaQuery);
     const drawRef = useRef(null);
-    const lensRef = useRef(null);
     const mode = enabled ? 'pinned' : 'stacked';
 
     let sceneCount = 0;
@@ -39,7 +39,7 @@ const Root = ({ children }) => {
         .map((c) => c.props.id);
 
     return (
-        <ScenesContext value={{ mode, drawRef, lensRef }}>
+        <ScenesContext value={{ mode, drawRef }}>
             {mode === 'pinned' ? (
                 <PinnedStage ids={ids}>
                     {parts}
@@ -53,24 +53,16 @@ const Root = ({ children }) => {
 
 const PinnedStage = ({ ids, children }) => {
     const rootRef = useRef(null);
-    const { drawRef, lensRef } = React.use(ScenesContext);
+    const { drawRef } = React.use(ScenesContext);
     const count = ids.length;
     const totalUnits = SCENES.sceneAt(count - 1) + SCENES.tailUnits;
 
     useLayoutEffect(() => {
         const ctx = gsap.context(() => {
             const scenes = gsap.utils.toArray('[data-scene]');
-            const zoom = { p: 0 };
-            const lens = scenes[SCENES.lensSceneIndex];
-
-            // The lens scene is only visible through the backdrop's lens ellipses (e.g. the glasses).
-            lensRef.current = ({ lenses, done }) => {
-                if (!lens) return;
-                const ellipse = ({ x, y, rx, ry }) =>
-                    `M${(x - rx).toFixed(1)} ${y.toFixed(1)}a${rx.toFixed(1)} ${ry.toFixed(1)} 0 1 0 ${(rx * 2).toFixed(1)} 0a${rx.toFixed(1)} ${ry.toFixed(1)} 0 1 0 ${(-rx * 2).toFixed(1)} 0Z`;
-                lens.style.clipPath = done ? 'none' : `path('${lenses.map(ellipse).join('')}')`;
-            };
-            const redraw = () => drawRef.current?.(zoom.p);
+            const view = { drive: 0, p: 0, e: 0 };
+            const stage = scenes[0]?.parentElement.querySelector('[data-stage-layer]');
+            const redraw = () => drawRef.current?.(view);
 
             const tl = gsap.timeline({
                 defaults: { ease: 'none' },
@@ -83,38 +75,52 @@ const PinnedStage = ({ ids, children }) => {
                 },
             });
 
-            // Backdrop zooms into the focus point (glasses).
-            tl.to(zoom, { p: 1, duration: SCENES.zoom.duration, ease: 'power2.inOut', onUpdate: redraw }, SCENES.zoom.at);
-
             scenes.forEach((scene, i) => {
                 const at = SCENES.sceneAt(i);
                 const items = scene.querySelectorAll('[data-scene-item]');
                 const bars = scene.querySelectorAll('[data-scene-bar]');
-                const next = SCENES.sceneAt(i + 1);
+                const kind = scene.dataset.sceneTransition;
 
                 if (i === 0) {
-                    tl.to(scene, { autoAlpha: 0, y: -30, duration: 0.3 }, 0);
+                    // First scene leaves as the next one begins.
+                    tl.to(scene, { autoAlpha: 0, x: -40, duration: 0.35 }, 0);
+                    return;
+                }
+
+                if (kind === 'zoom') {
+                    // Car drives along the track, the camera pushes into the windshield, which then opens onto the footage.
+                    tl.to(view, { drive: 1, duration: SCENES.drive.duration, ease: 'power1.inOut', onUpdate: redraw }, SCENES.drive.at);
+                    tl.to(view, { p: 1, duration: SCENES.dolly.duration, ease: 'power2.inOut', onUpdate: redraw }, SCENES.dolly.at);
+                    tl.to(view, { e: 1, duration: SCENES.reveal.duration, ease: 'power2.inOut', onUpdate: redraw }, SCENES.reveal.at);
+                    tl.fromTo(scene, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, at - 0.5);
+                } else if (kind === 'push') {
+                    // Enters from the left and pushes the previous scene (and the stage) out to the right.
+                    const from = at - SCENES.slide;
+                    const leaving = [scenes[i - 1], stage].filter(Boolean);
+                    tl.fromTo(scene, { xPercent: -100 }, { xPercent: 0, duration: SCENES.slide }, from);
+                    tl.to(leaving, { xPercent: 100, duration: SCENES.slide }, from);
+                    tl.set(leaving, { autoAlpha: 0 }, at);
                 } else {
-                    // The lens scene is revealed by its clip-path while zooming; others cross-fade in.
-                    const showAt = i === SCENES.lensSceneIndex ? SCENES.zoom.at + 0.1 : at - 0.65;
-                    tl.fromTo(scene, { autoAlpha: 0 }, { autoAlpha: 1, duration: i === SCENES.lensSceneIndex ? 0.01 : 0.4 }, showAt);
-                    if (items.length) {
-                        tl.fromTo(items, { y: 40, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.4, ease: 'power3.out', stagger: 0.04 }, at - 0.3);
-                    }
-                    if (bars.length) {
-                        tl.fromTo(bars, { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: 'power3.out', stagger: 0.03 }, at - 0.1);
-                    }
-                    if (i < count - 1) tl.to(scene, { autoAlpha: 0, duration: 0.01 }, next - 0.2);
+                    const from = at - SCENES.slide;
+                    const previous = scenes[i - 1];
+                    // Rise over the previous scene while it drifts up slightly (parallax).
+                    tl.fromTo(scene, { yPercent: 100 }, { yPercent: 0, duration: SCENES.slide }, from);
+                    tl.to(previous, { yPercent: -12, duration: SCENES.slide }, from);
+                    tl.set(previous, { autoAlpha: 0 }, at);
+                }
+
+                if (items.length) {
+                    tl.fromTo(items, { y: 40, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.45, ease: 'power3.out', stagger: 0.04 }, at - 0.45);
+                }
+                if (bars.length) {
+                    tl.fromTo(bars, { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: 'power3.out', stagger: 0.03 }, at - 0.2);
                 }
             });
             tl.to({}, { duration: SCENES.tailUnits }, SCENES.sceneAt(count - 1));
         }, rootRef);
 
-        return () => {
-            lensRef.current = null;
-            ctx.revert();
-        };
-    }, [count, drawRef, lensRef]);
+        return () => ctx.revert();
+    }, [count, drawRef]);
 
     return (
         <div ref={rootRef} className="relative" style={{ height: `${100 + totalUnits * SCENES.unitVh}vh` }}>
@@ -130,7 +136,7 @@ const PinnedStage = ({ ids, children }) => {
                     }}
                 />
             ))}
-            <div className="sticky top-0 h-screen overflow-hidden bg-dark-900">{children}</div>
+            <div className="sticky top-0 h-screen overflow-hidden">{children}</div>
         </div>
     );
 };

@@ -34,7 +34,7 @@ const ScrollToTop = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.5 }}
                     onClick={scrollToTop}
-                    className="fixed bottom-8 right-8 p-3 rounded-full bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.5)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)] transition-all z-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-dark-900"
+                    className="fixed bottom-8 right-8 p-3 rounded-full bg-gradient-to-r from-primary-500 to-accent-500 text-dark-900 shadow-[0_0_20px_rgba(212,162,76,0.45)] hover:shadow-[0_0_25px_rgba(233,213,161,0.6)] transition-all z-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-dark-900"
                     aria-label="Scroll to top"
                 >
                     <ArrowUp size={24} />
