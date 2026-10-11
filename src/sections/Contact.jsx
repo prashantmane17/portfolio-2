@@ -39,11 +39,11 @@ const Contact = () => {
                     className="text-center mb-16"
                 >
                     <h2 className="text-3xl md:text-5xl font-bold mb-4">
-                        Get In <span className="gradient-text">Touch</span>
+                        Let's make it <span className="gradient-text">move</span>
                     </h2>
                     <div className="w-20 h-1 bg-gradient-to-r from-primary-500 to-accent-500 mx-auto rounded-full" />
                     <p className="mt-6 text-gray-400 text-lg">
-                        Have a project in mind or want to discuss opportunities? Let's talk.
+                        Have a site that should feel alive? Tell me about it.
                     </p>
                 </motion.div>
 
@@ -90,7 +90,7 @@ const Contact = () => {
                                 onChange={handleChange}
                                 rows={5}
                                 className="w-full bg-dark-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all resize-none"
-                                placeholder="Tell me about your project..."
+                                placeholder="What should move, and where will it live?"
                             />
                         </div>
 

@@ -1,77 +1,70 @@
-import { Code2, LayoutTemplate, Smartphone, Server } from 'lucide-react';
-
 export const personalInfo = {
     name: "Prashant Mane",
-    role: "Shopify Theme Developer",
+    role: "Web Animation Developer",
     experience: "2 years",
-    about: "I'm a passionate Full Stack Developer specializing in React and Shopify Theme Development. With 2 years of experience in frontend development, I build premium, responsive, and performant web applications that deliver exceptional user experiences.",
+    about: "I build websites where motion does the talking: scroll-driven scenes, 3D and canvas that run at a steady 60fps, never at the cost of speed or accessibility.",
     email: "your.email@example.com",
     github: "https://github.com/yourusername",
     linkedin: "https://linkedin.com/in/yourusername",
 };
 
-export const skills = [
-    { name: "React JS", level: 90 },
-    { name: "Next JS", level: 80 },
-    { name: "JavaScript (ES6+)", level: 90 },
-    { name: "HTML5 & CSS3", level: 95 },
-    { name: "Tailwind CSS", level: 90 },
-    { name: "Shopify Liquid", level: 85 },
-    { name: "Shopify Theme Dev", level: 85 },
-    { name: "Backend Integration", level: 75 },
-];
-
+/** Animation work shown in the Projects section. Replace with real case studies. */
 export const projects = [
     {
-        title: "Task Management Application",
-        description: "A comprehensive React-based productivity app with real-time updates and an intuitive UI.",
-        tech: ["React JS", "Tailwind CSS", "Node.js", "MongoDB"],
+        title: "Scroll-Driven Product Launch",
+        description: "A pinned, scrubbed story where the product turns, opens and zooms with every scroll, from first frame to checkout.",
+        tech: ["GSAP", "ScrollTrigger", "Lenis"],
         liveUrl: "#",
         githubUrl: "#",
         image: "https://images.unsplash.com/photo-1555774698-0b77e0d5fac6?q=80&w=800&auto=format&fit=crop"
     },
     {
-        title: "Evoxcel Website",
-        description: "A premium business website with fluid animations, dynamic routing, and SEO optimization.",
-        tech: ["Next.js", "Framer Motion", "Tailwind CSS"],
+        title: "3D Car Configurator Hero",
+        description: "A real-time 3D model with opening doors, live paint changes and a camera that flies into the cabin.",
+        tech: ["three.js", "WebGL", "glTF"],
         liveUrl: "#",
         githubUrl: "#",
         image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop"
     },
     {
-        title: "Personal Portfolio Theme",
-        description: "A sleek, dark-themed portfolio template built for developers to showcase their work.",
-        tech: ["React", "Framer Motion", "Vite"],
+        title: "Cinematic Agency Site",
+        description: "Page transitions, masked text reveals and a canvas backdrop that drifts with the scroll.",
+        tech: ["Canvas", "GSAP", "React"],
         liveUrl: "#",
         githubUrl: "#",
         image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=800&auto=format&fit=crop"
     },
     {
-        title: "Storefront - E-commerce",
-        description: "A fully custom Shopify theme for a high-end fashion brand with advanced filtering.",
-        tech: ["Shopify Liquid", "JavaScript", "Tailwind CSS"],
+        title: "Interactive Storefront",
+        description: "Micro-interactions and smooth-scrolling product galleries that stay fast on a mid-range phone.",
+        tech: ["Shopify", "Lenis", "Motion"],
         liveUrl: "#",
         githubUrl: "#",
         image: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?q=80&w=800&auto=format&fit=crop"
     }
 ];
 
-
 /** Static car PNG (public/car.png): used as the footage stand-in and on small screens. */
 export const carImage = { src: "/car.png" };
 
 /**
- * 3D hero car (public/models/car.glb, currently a placeholder sample).
+ * 3D hero car (public/models/lambo-opt.glb: your lambo.glb, textures resized and mesh-compressed).
  * `heading` = fixed direction the car faces (radians about Y; ~1.1 = facing screen-right).
- * `focus` = the body-panel point the scroll zooms into, as fractions of the model's bounding box
- *           (each -0.5..0.5, centred; the sign of x picks the side).
- * `entry` = how far (car lengths) and how high the car starts when it drives in on load.
- * `paint` = the paint colour the zoom ends on (the next section's background matches it).
+ * `doors`   = hinge rotation on scroll: `axis` of the hinge node and the opening `angle` in radians
+ *             (the direction is picked per door so both lift).
+ * `cabin`   = where the camera ends up, relative to the steering wheel it looks at, in car lengths
+ *             (x = across, y = up, z = toward the nose). Smaller numbers zoom in closer.
+ * `entry`   = how far (car lengths) and how high the car starts when it drives in on load.
+ * `repaint` = which body materials turn from black to `color` while the car centres (`gain` brightens
+ *             the dark carbon textures, `glow` adds a little emissive).
+ * `paint`   = the colour the zoom ends on (the next section's background matches it).
  */
 export const car3d = {
-    src: "/models/car.glb",
+    src: "/models/lambo-opt.glb",
     heading: 1.1,
-    focus: [-0.5, 0.0, 0.03],
+    doors: { axis: "x", angle: 1.1 },
+    cabin: { offset: [0.3, 0.07, -0.22] },
+    repaint: { materials: ["Carbon_R", "Carbon_M", "CENTENARIO", "material_0"], color: "#d41f2b", gain: 8, glow: 0.12 },
     entry: { distance: 2.6, height: 0.6 },
     paint: "#b8141c",
 };

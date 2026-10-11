@@ -1,14 +1,14 @@
 import React from 'react';
 import SectionHeading from '../components/ui/SectionHeading';
 import { motion } from 'framer-motion';
-import { ExternalLink, Github } from 'lucide-react';
+import { ExternalLink, FileText } from 'lucide-react';
 import { projects } from '../data/portfolio';
 
 const Projects = () => {
     return (
         <section className="py-24 relative overflow-hidden">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <SectionHeading accent="Projects">Featured</SectionHeading>
+                <SectionHeading accent="Motion Work">Selected</SectionHeading>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {projects.map((project, index) => (
@@ -63,7 +63,7 @@ const Projects = () => {
                                         rel="noopener noreferrer"
                                         className="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white transition-colors"
                                     >
-                                        <Github size={16} /> Source
+                                        <FileText size={16} /> Case study
                                     </a>
                                 </div>
                             </div>

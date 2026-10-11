@@ -13,7 +13,7 @@ const smooth = (t) => {
  * flat fill in the car's paint colour that takes over as the camera closes on the body.
  *   intro 0..1 (time)   car drives in on load
  *   p     0..1 (scroll) car glides to centre, then the camera zooms into the red panel
- * Props: model = { src, focus, heading, entry }, fill = paint colour.
+ * Props: model = { src, heading, entry, doors, cabin }, fill = paint colour.
  */
 const Backdrop = ({ model, fill }) => {
     const { mode, drawRef } = useScenes();

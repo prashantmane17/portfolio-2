@@ -1,11 +1,15 @@
 /**
  * three.js stage for the hero car: a transparent WebGL canvas with a glTF car.
  *  - intro (time-based): the car drives in from the upper left to its hero spot
- *  - p (scroll): the car glides to centre while turning one full circle, then the camera closes on its red body panel
+ *  - p (scroll): the car glides to centre while turning one full circle with its doors swinging
+ *    open, then the camera flies in through the open door to the driver's seat
  * three is loaded on demand so it stays out of the main bundle.
  *
- * `focus` is the body-panel point to zoom into, as fractions of the model's normalised
- * bounding box (each -0.5..0.5, centred). `heading` is the fixed direction the car faces.
+ * `heading` is the fixed direction the car faces. `doors` = { angle, axis } for the hinge nodes
+ * (any node with a child named like "Door"; both swing the same way). `repaint` = { materials, color, gain, glow }:
+ * body materials that shift from black to `color` as the car centres. `cabin.offset` places the final
+ * camera relative to the steering wheel, in car lengths (x = across, y = up, z = toward the nose),
+ * and the camera looks at the wheel.
  */
 const lerp = (a, b, t) => a + (b - a) * t;
 const smooth = (t) => {
@@ -14,10 +18,11 @@ const smooth = (t) => {
 };
 
 export async function createCarStage(canvas, options) {
-    const { src, focus, heading, entry } = options;
+    const { src, heading, entry, doors, cabin, repaint } = options;
     const THREE = await import('three');
     const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
     const { RoomEnvironment } = await import('three/examples/jsm/environments/RoomEnvironment.js');
+    const { MeshoptDecoder } = await import('three/examples/jsm/libs/meshopt_decoder.module.js');
 
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     renderer.setClearColor(0x000000, 0);
@@ -46,7 +51,7 @@ export async function createCarStage(canvas, options) {
     const pivot = new THREE.Group();
     lane.add(pivot);
 
-    const gltf = await new GLTFLoader().loadAsync(src);
+    const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(src);
     const model = gltf.scene;
     const box = new THREE.Box3().setFromObject(model);
     const size = box.getSize(new THREE.Vector3());
@@ -73,8 +78,47 @@ export async function createCarStage(canvas, options) {
     shadow.position.y = -dims.y / 2 + 0.002;
     pivot.add(shadow);
 
-    const focusLocal = new THREE.Vector3(focus[0] * dims.x, focus[1] * dims.y, focus[2] * dims.z);
-    const outward = new THREE.Vector3(Math.sign(focus[0]) || -1, 0, 0);
+    // Door hinges: the parent of each door mesh (rigged as an empty at the hinge).
+    const hinges = [];
+    model.traverse((node) => {
+        if (node.children.some((c) => /door/i.test(c.name)) && !hinges.includes(node)) hinges.push(node);
+    });
+    // Steering wheel position in the car's own space (the camera's final target).
+    model.updateMatrixWorld(true);
+    const steer = new THREE.Vector3();
+    let steerNode = null;
+    model.traverse((node) => {
+        if (!steerNode && /steer/i.test(node.name)) steerNode = node;
+    });
+    new THREE.Box3().setFromObject(steerNode || model).getCenter(steer);
+    const lookLocal = pivot.worldToLocal(steer);
+    // Come in from the side the camera starts on, so the open door is between it and the wheel.
+    const cameraSide = -Math.sign(Math.sin(heading)) || 1; // which local side (+x/-x) faces the camera
+    const eyeLocal = lookLocal.clone().add(new THREE.Vector3(Math.abs(cabin.offset[0]) * cameraSide, cabin.offset[1], cabin.offset[2]));
+
+    // The two hinge rigs are not guaranteed to share an orientation: pick, per door, the sign that lifts it.
+    const liftSign = new Map();
+    hinges.forEach((h) => {
+        const centreY = (angle) => {
+            h.rotation[doors.axis] = angle;
+            h.updateMatrixWorld(true);
+            return new THREE.Box3().setFromObject(h).getCenter(new THREE.Vector3()).y;
+        };
+        liftSign.set(h, centreY(doors.angle) >= centreY(-doors.angle) ? 1 : -1);
+        h.rotation[doors.axis] = 0;
+        h.updateMatrixWorld(true);
+    });
+    // Repaint: tint the body materials from their original black toward `repaint.color` while centring.
+    const paint = new THREE.Color(repaint.color);
+    const tinted = [];
+    const seenMaterials = new Set();
+    model.traverse((o) => {
+        const m = o.material;
+        if (!m || seenMaterials.has(m) || !repaint.materials.includes(m.name)) return;
+        seenMaterials.add(m);
+        tinted.push({ m, base: m.color.clone() });
+    });
+    const target = paint.clone().multiplyScalar(repaint.gain);
     let width = 1;
     let height = 1;
 
@@ -96,20 +140,26 @@ export async function createCarStage(canvas, options) {
         pivot.position.y = entry.height * (1 - intro);
         lane.updateMatrixWorld(true);
 
-        // Scroll: glide to centre, then close on the body panel.
+        // Scroll: glide to centre while turning and opening the doors, then fly into the cabin.
         const centre = smooth(p / 0.4);
         const zoom = smooth((p - 0.4) / 0.6);
         pivot.rotation.y = Math.PI * 2 * smooth(p / 0.78); // one full turn, ending where it started
+        tinted.forEach(({ m, base }) => {
+            m.color.copy(base).lerp(target, centre);
+            m.emissive.copy(paint).multiplyScalar(repaint.glow * centre);
+        });
+        const open = smooth((p - 0.05) / 0.3);
+        hinges.forEach((h) => (h.rotation[doors.axis] = open * doors.angle * liftSign.get(h)));
         pivot.updateMatrixWorld(true);
-        const panel = pivot.localToWorld(focusLocal.clone());
+
+        const eye = pivot.localToWorld(eyeLocal.clone());
+        const look = pivot.localToWorld(lookLocal.clone());
         const start = new THREE.Vector3(0, dims.y * 0.9, radius);
         const target0 = new THREE.Vector3(0, -dims.y * 0.1, 0);
-        const side = outward.clone().transformDirection(lane.matrixWorld);
-        const endPosition = panel.clone().addScaledVector(side, 0.05);
 
-        camera.position.copy(start).lerp(endPosition, zoom);
+        camera.position.copy(start).lerp(eye, zoom);
         camera.position.y += bob;
-        camera.lookAt(new THREE.Vector3().lerpVectors(target0, panel, zoom));
+        camera.lookAt(new THREE.Vector3().lerpVectors(target0, look, zoom));
 
         // The car sits right of centre in the hero.
         camera.setViewOffset(width, height, -width * 0.17 * (1 - centre), 0, width, height);
